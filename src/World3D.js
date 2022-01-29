@@ -61,6 +61,7 @@ export class World3D {
         // На земле ли игрок?
         this.OnGroundFlag = true;
     }
+
     get Deltas() {
         return this.__Deltas;
     }
@@ -74,6 +75,8 @@ export class World3D {
      * @param {KeyboardEvent} event
      */
     onKeyDown(event) {
+        console.log("[onKeyDown] =====> this.Deltas: ", this.Deltas);
+
         if (event.key == "a" || event.code == "ArrowLeft") {
             this.PressLeft = 1;
         }

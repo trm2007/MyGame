@@ -22,12 +22,14 @@ const Player1 = new PlayerClass(-900, 0, -900, 0, -135);
 
 const NewWorld = new World3D(Player1);
 
+const Delta = 20;
+
 World3D.Deltas = {
-    LeftRight: 3,
-    UpDown: 3,
-    ForwardBack: 3,
-    RotateX: 3,
-    RotateY: 3,
+    LeftRight: Delta,
+    UpDown: Delta,
+    ForwardBack: Delta,
+    RotateX: Delta,
+    RotateY: Delta,
 };
 
 NewWorld.createNewWorld(Map3D);

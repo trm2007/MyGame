@@ -21,7 +21,7 @@
 .square {
     position: absolute;
 }
-.pawn {
+/* .pawn {
     display: none;
     position: absolute;
     top: calc(var(--container-height) / 2);
@@ -29,4 +29,4 @@
     transform: translate(-50%, -50%);
     width: 100px;
     height: 100px;
-}
+} */
