@@ -1,37 +1,9 @@
-/**
- * класс player (Pawn)
- */
-class player {
-    /**
-     * Конструктор
-     *
-     * @param {*} x
-     * @param {*} y
-     * @param {*} z
-     * @param {*} rx
-     * @param {*} ry
-     */
-    constructor(x, y, z, rx, ry) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.rx = rx;
-        this.ry = ry;
-    }
-}
-
-// Мировые константы
-const pi = 3.141592;
-const deg = pi / 180;
-
 // Массив прямоугольников
-const map = [
-    [0, 0, 1000, 0, 180, 0, 2000, 200, "#11aa22"],
-    [0, 0, -1000, 0, 0, 0, 2000, 200, "#11aa22"],
-    [1000, 0, 0, 0, -90, 0, 2000, 200, "#11cc22"],
-    [-1000, 0, 0, 0, 90, 0, 2000, 200, "#11cc22"],
-    [0, 100, 0, 90, 0, 0, 2000, 2000, "#666666"],
-];
+import map from "./map.js";
+
+import player from "./player.js";
+
+import { deg } from "./constants.js";
 
 // Нажата ли клавиша?
 var PressBack = 0;
@@ -50,13 +22,23 @@ var lock = false;
 // На земле ли игрок?
 var onGround = true;
 
-// Привяжем новую переменную к container
+/**
+ * Получим контейнер для 3D-сцен в переменную container.
+ * В html-файле должен быть элемент div с id="container"
+ */
 var container = document.getElementById("container");
+// размер контейнера
+const ContainerWidth = 1200;
+const ContainerHeight = 800;
+// значение перспективы (условно откуда наблюдаем за сценой)
+const PerspectiveOffset = 600;
+
+container.style.setProperty("--container-width", ContainerWidth + "px");
+container.style.setProperty("--container-height", ContainerHeight + "px");
+container.style.setProperty("--perspective-offset", PerspectiveOffset + "px");
 
 // Обработчик нажатия клавиш
 document.addEventListener("keydown", (event) => {
-    console.log("[keydown] ===> event: ", event);
-
     if (event.key == "a" || event.code == "ArrowLeft") {
         PressLeft = 1;
     }
@@ -72,8 +54,15 @@ document.addEventListener("keydown", (event) => {
     if ((event.code == "Space" || event.code == "PageUp") && onGround) {
         PressUp = 1;
     }
-    if (event.code == "PageDown" && onGround) {
+    if (event.code == "PageDown" && !onGround) {
         PressDown = 1;
+    }
+
+    if (event.key == "q") {
+        MouseX = -5;
+    }
+    if (event.key == "e") {
+        MouseX = 5;
     }
 });
 
@@ -99,69 +88,88 @@ document.addEventListener("keyup", (event) => {
     }
 });
 
-
 // Обработчик изменения состояния захвата курсора
 document.addEventListener("pointerlockchange", (event) => {
     lock = !lock;
+    if (lock) {
+        // Включаем обработчик движения мыши
+        document.addEventListener("mousemove", setMouseCoords);
+    } else {
+        // Отключаем обработчик движения мыши
+        document.removeEventListener("mousemove", setMouseCoords);
+    }
 });
 
 // Обработчик захвата курсора мыши
 container.onclick = function () {
-    if (!lock) container.requestPointerLock();
+    if (!lock) {
+        container.requestPointerLock();
+    }
 };
 
-// Обработчик движения мыши
-document.addEventListener("mousemove", (event) => {
+function setMouseCoords(event) {
     MouseX = event.movementX;
     MouseY = event.movementY;
-});
+}
 
 // Создаем новый объект
-var pawn = new player(-900, 0, -900, 0, 0);
+var pawn = new player(-900, 0, -900, 0, -135);
 
 // Привяжем новую переменную к world
-var world = document.getElementById("world");
+// var world = document.getElementById("world");
+const world = document.createElement("div");
+world.setAttribute("id", "world");
+world.classList.add("world");
+
+container.appendChild(world);
 
 function update() {
     // Задаем локальные переменные смещения
-
-    dx =
+    let dx =
         (PressRight - PressLeft) * Math.cos(pawn.ry * deg) -
         (PressForward - PressBack) * Math.sin(pawn.ry * deg);
-    dz =
+    let dz =
         -(PressForward - PressBack) * Math.cos(pawn.ry * deg) -
         (PressRight - PressLeft) * Math.sin(pawn.ry * deg);
-    dy = -PressUp;
-    drx = MouseY;
-    dry = -MouseX;
+    let dy = -(PressUp - PressDown);
+    let drx = MouseY;
+    let dry = -MouseX;
 
     // Обнулим смещения мыши:
-
     MouseX = MouseY = 0;
 
     // Проверяем коллизию с прямоугольниками
-
-    collision();
+    collision(map);
 
     // Прибавляем смещения к координатам
-
+    // ось x - это влево-вправо
     pawn.x = pawn.x + dx;
+    // ось y - это вверх-вниз
     pawn.y = pawn.y + dy;
+    // ось z - это вперед-назад (вглубь монитора)
     pawn.z = pawn.z + dz;
-    console.log(pawn.x + ":" + pawn.y + ":" + pawn.z);
+    // console.log(pawn.x + ":" + pawn.y + ":" + pawn.z);
+
+    // проверяем на земле игрок
+    if (pawn.y == 0) {
+        onGround = true;
+    }
+    // или нет
+    else {
+        onGround = false;
+    }
 
     // Если курсор захвачен, разрешаем вращение
-
-    if (lock) {
+    // if (lock) {
+    if (true) {
         pawn.rx = pawn.rx + drx;
         pawn.ry = pawn.ry + dry;
     }
 
     // Изменяем координаты мира (для отображения)
-
     world.style.transform =
         "translateZ(" +
-        (600 - 0) +
+        (PerspectiveOffset - 0) +
         "px)" +
         "rotateX(" +
         -pawn.rx +
@@ -178,7 +186,16 @@ function update() {
         "px)";
 }
 
-function CreateNewWorld() {
+/**
+ * Создает внутри объекта word набор элементов (<div>) на основе массива map
+ *
+ * @param {Array} map Массив прямоугольников. Каждый элемент массива - 8 цифр и строковео значение,
+ * первые три числа (0,1,2) – это координаты центра прямоугольника,
+ * вторые три числа (3,4,5) – углы поворота в градусах (относительно того же центра),
+ * затем два числа (6,7) – его размеры
+ * последнее значение (8) – фон, может быть сплошным цветом, градиентом или фотографией (текстурой).
+ */
+function CreateNewWorld(map) {
     for (let i = 0; i < map.length; i++) {
         // Создание прямоугольника и придание ему стилей
 
@@ -190,12 +207,12 @@ function CreateNewWorld() {
         newElement.style.background = map[i][8];
         newElement.style.transform =
             "translate3d(" +
-            (600 - map[i][6] / 2 + map[i][0]) +
-            "px," +
-            (400 - map[i][7] / 2 + map[i][1]) +
-            "px," +
+            (ContainerWidth / 2 - map[i][6] / 2 + map[i][0]) +
+            "px," + // по оси X
+            (ContainerHeight / 2 - map[i][7] / 2 + map[i][1]) +
+            "px," + // по оси Y
             map[i][2] +
-            "px)" +
+            "px)" + // по оси Z
             "rotateX(" +
             map[i][3] +
             "deg)" +
@@ -212,10 +229,13 @@ function CreateNewWorld() {
     }
 }
 
-function collision() {
+function collision(map) {
+    let dx = 0,
+        dy = 0,
+        dz = 0;
+
     for (let i = 0; i < map.length; i++) {
         // рассчитываем координаты игрока в системе координат прямоугольника
-
         let x0 = pawn.x - map[i][0];
         let y0 = pawn.y - map[i][1];
         let z0 = pawn.z - map[i][2];
@@ -296,5 +316,5 @@ function coorReTransform(x3, y3, z3, rxc, ryc, rzc) {
     return [x0, y0, z0];
 }
 
-CreateNewWorld();
-TimerGame = setInterval(update, 10);
+CreateNewWorld(map);
+let TimerGame = setInterval(update, 10);

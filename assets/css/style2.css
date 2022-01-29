@@ -1,26 +1,32 @@
-#container{
-	position:absolute;
-	width:1200px;
-	height:800px;
-	border:2px solid #000000;
-	perspective:600px;
-	overflow:hidden;
+:root {
+    --container-width: 1200px;
+    --container-height: 800px;
+    --perspective-offset: 600px;
 }
-#world{
-	position:absolute;
-	width:inherit;
-	height:inherit;
-	transform-style:preserve-3d;
+
+#container {
+    position: absolute;
+    width: var(--container-width);
+    height: var(--container-height);
+    border: 2px solid #000000;
+    perspective: var(--perspective-offset);
+    overflow: hidden;
 }
-.square{
-	position:absolute;
+.world {
+    position: absolute;
+    width: inherit;
+    height: inherit;
+    transform-style: preserve-3d;
 }
-#pawn{
-	display:none;
-	position:absolute;
-	top:400px;
-	left:600px;
-	transform:translate(-50%,-50%);
-	width:100px;
-	height:100px;
+.square {
+    position: absolute;
+}
+.pawn {
+    display: none;
+    position: absolute;
+    top: calc(var(--container-height) / 2);
+    left: calc(var(--container-width) / 2);
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
 }
