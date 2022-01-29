@@ -21,50 +21,59 @@ export const deg = pi / 180;
  * @param {PlayerClass} Player в качестве аргумента принимает объект типа PlayerClass,
  * это фактически наблюдатель, глазами которого мы будем видеть мир
  */
-export function World3D(Player) {
-    this.Player = Player;
+export class World3D {
+    constructor(Player) {
+        this.Player = Player;
 
-    this.World = null;
+        this.World = null;
 
-    /**
-     * на какую величину за один раз менять координаты,
-     * это условные величины
-     */
-    this.Deltas = {
-        LeftRight: 1,
-        UpDown: 1,
-        ForwardBack: 1,
-        RotateX: 1,
-        RotateY: 1,
-    };
-    // значение перспективы (условно откуда наблюдаем за сценой)
-    this.PerspectiveOffset = DEFAULT_PERSPECTIVE_OFFSET;
-    // размер контейнера
-    this.ContainerWidth = DEFAULT_CONTAINERWIDTH;
-    this.ContainerHeight = DEFAULT_CONTAINERHEIGHT;
-    // Нажата ли клавиша?
-    this.PressBack = 0;
-    this.PressForward = 0;
-    this.PressLeft = 0;
-    this.PressRight = 0;
-    this.PressUp = 0;
-    this.PressDown = 0;
-    // двигается ли мышь?
-    this.MouseX = 0;
-    this.MouseY = 0;
+        /**
+         * на какую величину за один раз менять координаты,
+         * это условные величины
+         */
+        this.__Deltas = {
+            LeftRight: 1,
+            UpDown: 1,
+            ForwardBack: 1,
+            RotateX: 1,
+            RotateY: 1,
+        };
 
-    // Введен ли захват мыши?
-    this.LockMouseFlag = false;
+        // значение перспективы (условно откуда наблюдаем за сценой)
+        this.PerspectiveOffset = DEFAULT_PERSPECTIVE_OFFSET;
+        // размер контейнера
+        this.ContainerWidth = DEFAULT_CONTAINERWIDTH;
+        this.ContainerHeight = DEFAULT_CONTAINERHEIGHT;
+        // Нажата ли клавиша?
+        this.PressBack = 0;
+        this.PressForward = 0;
+        this.PressLeft = 0;
+        this.PressRight = 0;
+        this.PressUp = 0;
+        this.PressDown = 0;
+        // двигается ли мышь?
+        this.MouseX = 0;
+        this.MouseY = 0;
 
-    // На земле ли игрок?
-    this.OnGroundFlag = true;
+        // Введен ли захват мыши?
+        this.LockMouseFlag = false;
+
+        // На земле ли игрок?
+        this.OnGroundFlag = true;
+    }
+    get Deltas() {
+        return this.__Deltas;
+    }
+    set Deltas(Deltas) {
+        this.__Deltas = Object.assign(this.__Deltas, Deltas);
+    }
 
     /**
      * Обработчик нажатия клавиш
      *
      * @param {KeyboardEvent} event
      */
-    this.onKeyDown = function (event) {
+    onKeyDown(event) {
         if (event.key == "a" || event.code == "ArrowLeft") {
             this.PressLeft = 1;
         }
@@ -95,14 +104,14 @@ export function World3D(Player) {
         if (event.key == "e") {
             this.MouseX = 1;
         }
-    };
+    }
 
     /**
      * Обработчик отжатия клавиш
      *
      * @param {KeyboardEvent} event
      */
-    this.onKeyUp = function (event) {
+    onKeyUp(event) {
         if (event.key == "a" || event.code == "ArrowLeft") {
             this.PressLeft = 0;
         }
@@ -121,14 +130,14 @@ export function World3D(Player) {
         if (event.code == "PageDown") {
             this.PressDown = 0;
         }
-    };
+    }
 
     /**
      * Обработчик изменения состояния захвата курсора
      *
      * @param {Event} event
      */
-    this.onPointerLockChange = function (event) {
+    onPointerLockChange(event) {
         console.log("[onPointerLockChange] ===> event: ", event);
         this.LockMouseFlag = !this.LockMouseFlag;
         if (this.LockMouseFlag) {
@@ -138,16 +147,16 @@ export function World3D(Player) {
             // Отключаем обработчик движения мыши
             document.removeEventListener("mousemove", this.setMouseCoords);
         }
-    };
+    }
 
     /**
      * Обработчик нажатия в контейнере - захват курсора мыши
      */
-    this.onClick = function () {
+    onClick() {
         if (!this.LockMouseFlag) {
             this.Container.requestPointerLock();
         }
-    };
+    }
 
     /**
      * Сохраняет смещения курсора мыши по осям в локальных переменных,
@@ -166,7 +175,7 @@ export function World3D(Player) {
      *
      * @param {MouseEvent} event
      */
-    this.setMouseCoords = function (event) {
+    setMouseCoords = function (event) {
         this.MouseX = event.movementX;
         this.MouseY = event.movementY;
     }.bind(this);
@@ -175,7 +184,7 @@ export function World3D(Player) {
      * обновляет положение наблюдателя,
      * пересчитывает координаты, если произошло смещение
      */
-    this.update = function () {
+    update() {
         const MoveRight = this.PressRight * this.Deltas.LeftRight;
         const MoveLeft = this.PressLeft * this.Deltas.LeftRight;
         const MoveBack = this.PressBack * this.Deltas.ForwardBack;
@@ -249,7 +258,7 @@ export function World3D(Player) {
             "px," +
             -this.Player.z +
             "px)";
-    };
+    }
 
     /**
      * Создает внутри объекта World3D набор элементов (<div>) на основе массива this.Map3D
@@ -260,7 +269,7 @@ export function World3D(Player) {
      * затем два числа (6,7) – его размеры
      * последнее значение (8) – фон, может быть сплошным цветом, градиентом или фотографией (текстурой).
      */
-    this.createNewWorld = function (Map3D) {
+    createNewWorld(Map3D) {
         this.Map3D = Map3D;
 
         // Привяжем новую переменную к this.World
@@ -301,9 +310,9 @@ export function World3D(Player) {
             // Вставка прямоугольника в this.World
             this.World.append(newElement);
         }
-    };
+    }
 
-    this.collision = function () {
+    collision() {
         let dx = 0,
             dy = 0,
             dz = 0;
@@ -361,9 +370,9 @@ export function World3D(Player) {
                 }
             }
         }
-    };
+    }
 
-    this.coorTransform = function (x0, y0, z0, rxc, ryc, rzc) {
+    coorTransform(x0, y0, z0, rxc, ryc, rzc) {
         let x1 = x0;
         let y1 = y0 * Math.cos(rxc * deg) + z0 * Math.sin(rxc * deg);
         let z1 = -y0 * Math.sin(rxc * deg) + z0 * Math.cos(rxc * deg);
@@ -374,9 +383,9 @@ export function World3D(Player) {
         let y3 = -x2 * Math.sin(rzc * deg) + y2 * Math.cos(rzc * deg);
         let z3 = z2;
         return [x3, y3, z3];
-    };
+    }
 
-    this.coorReTransform = function (x3, y3, z3, rxc, ryc, rzc) {
+    coorReTransform(x3, y3, z3, rxc, ryc, rzc) {
         let x2 = x3 * Math.cos(rzc * deg) - y3 * Math.sin(rzc * deg);
         let y2 = x3 * Math.sin(rzc * deg) + y3 * Math.cos(rzc * deg);
         let z2 = z3;
@@ -387,7 +396,7 @@ export function World3D(Player) {
         let y0 = y1 * Math.cos(rxc * deg) - z1 * Math.sin(rxc * deg);
         let z0 = y1 * Math.sin(rxc * deg) + z1 * Math.cos(rxc * deg);
         return [x0, y0, z0];
-    };
+    }
 
     /**
      * Запускает обработку событий в 3D-мире,
@@ -397,7 +406,7 @@ export function World3D(Player) {
      * @param {*} PerspectiveOffset перспектива, условно - это точка с которой мы обозреваем мир
      * @param {*} UpdateFrequency частота обновления сцен в мире, по умолчанию 10мс, т.е. 100 раз в секунду
      */
-    this.run = function (
+    run(
         ContainerWidth = DEFAULT_CONTAINERWIDTH,
         ContainerHeight = DEFAULT_CONTAINERHEIGHT,
         PerspectiveOffset = DEFAULT_PERSPECTIVE_OFFSET,
@@ -444,7 +453,7 @@ export function World3D(Player) {
         this.Container.onclick = this.onClick.bind(this);
 
         this.TimerGame = setInterval(this.update.bind(this), UpdateFrequency);
-    };
+    }
 }
 
 export default World3D;
