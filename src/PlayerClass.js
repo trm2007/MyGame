@@ -1,7 +1,7 @@
 /**
  * класс player (Pawn)
  */
-export class player {
+export class PlayerClass {
     /**
      * Конструктор
      *
@@ -20,4 +20,4 @@ export class player {
     }
 }
 
-export default player;
+export default PlayerClass;
