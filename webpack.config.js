@@ -3,7 +3,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     entry: {
-        index: "/src/index.js",
+        index: "/src/World3D/index.js",
         game2: "/src/Game2/index.js",
     },
     output: {
@@ -13,7 +13,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: "My Game",
+            title: "World3D",
             // Load a custom template
             template: "/assets/index.html",
             chunks: ['index'],
