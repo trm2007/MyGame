@@ -1,7 +1,16 @@
 # MyGame
 
+## World3D
+
 На 29.01.2022 реализован механизм 3D комнаты.
 За основу взята статья - https://habr.com/ru/post/510778/
+
+## Flappy Bird
+
+02.02.2022 добавлен шаблон игры Flappy Bird
+на основе статьи - https://itproger.com/news/igra-na-chistom-javascript-za-20-minut
+
+## TODO
 
 ## Unit
 
